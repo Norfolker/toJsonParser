@@ -8,9 +8,7 @@ import com.opencsv.CSVWriter;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -30,8 +28,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        File csv = new File("C://Users//User//IdeaProjects//CsvJsonParser//src//Main//java//ru//netology",
-                "data.csv");
+        final String CSV_PATH = "C://Users//User//IdeaProjects//CsvJsonParser//src//main//java//ru//netology//files//data.csv";
+        final String JSON_PATH = "C://Users//User//IdeaProjects//CsvJsonParser//src//main//java//ru//netology//files//new_data.json";
+        final String XML_PATH = "C://Users//User//IdeaProjects//CsvJsonParser//src//main//java//ru//netology//files//data.xml";
+
+        File csv = new File(CSV_PATH);
         String[] employee = "1,John,Smith,USA,25".split(",");
         String[] employee2 = "2,Ivan,Petrov,RU,23".split(",");
         try (CSVWriter writer = new CSVWriter(new FileWriter(csv, true))) {
@@ -42,18 +43,17 @@ public class Main {
         }
 
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
-        String fileName = "C://Users//User//IdeaProjects//CsvJsonParser//src//Main//java//ru//netology//data.csv";
-        List<Employee> employees = parseCSV(columnMapping, fileName);
+        List<Employee> employees = parseCSV(columnMapping, CSV_PATH);
         System.out.println(employees.toString());
         String json = listToJson(employees);
         System.out.println(json);
-        writeString(json);
+        writeString(json, JSON_PATH);
 
-        List<Employee> employees2 = parseXML("C://Users//User//IdeaProjects//CsvJsonParser//src//Main//java//ru//netology//data.xml");
+        List<Employee> employees2 = parseXML(XML_PATH);
         System.out.println(employees2.toString());
         String json2 = listToJson(employees2);
         System.out.println(json2);
-        writeString(json2);
+        writeString(json2, JSON_PATH);
     }
 
     protected static List parseCSV(String[] columnMapping, String filename) {
@@ -79,14 +79,12 @@ public class Main {
         return json;
     }
 
-    protected static void writeString(String string) {
+    protected static void writeString(String string, String path) {
         JSONParser parser = new JSONParser();
-        try (FileWriter file = new FileWriter("C://Users//User//IdeaProjects//CsvJsonParser//src//Main//java//ru//netology//new_data.json")){
-            JSONArray list = new JSONArray();
-            list.add(parser.parse(string));
-            file.write(list.toJSONString());
+        try (FileWriter file = new FileWriter(path)){
+            file.write(string);
             file.flush();
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -96,15 +94,15 @@ public class Main {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(path);
-            NodeList nodeList = doc.getDocumentElement().getElementsByTagName("employee");
+            Document doc = builder.parse(new File(path));
+            Node root = doc.getDocumentElement();
+            NodeList nodeList = root.getChildNodes();
             List<Employee> list = new ArrayList<>();
             for (int i = 0; i < nodeList.getLength(); i++) {
-                Element element = (Element) nodeList.item(i);
+                Node element = nodeList.item(i);
                 NamedNodeMap map = element.getAttributes();
-                int id = Integer.parseInt(map.getNamedItem("id").getNodeValue());
-                list.add(new Employee(Integer.parseInt(map.getNamedItem("id").getNodeValue()), map.getNamedItem("firstName").getNodeValue(), map.getNamedItem("lastName").getNodeValue(),
-                        map.getNamedItem("country").getNodeValue(), Integer.parseInt(map.getNamedItem("age").getNodeValue())));
+                list.add(new Employee(Integer.parseInt(map.item(0).getNodeName()), map.item(1).getNodeName(), map.item(2).getNodeName(),
+                        map.item(3).getNodeName(), Integer.parseInt(map.item(4).getNodeName())));
             }
             return list;
         } catch (ParserConfigurationException e) {
