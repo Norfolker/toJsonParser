@@ -10,11 +10,9 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.json.simple.parser.JSONParser;
 import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -99,17 +97,17 @@ public class Main {
             NodeList nodeList = root.getChildNodes();
             List<Employee> list = new ArrayList<>();
             for (int i = 0; i < nodeList.getLength(); i++) {
-                Node element = nodeList.item(i);
-                NamedNodeMap map = element.getAttributes();
-                list.add(new Employee(Integer.parseInt(map.item(0).getNodeName()), map.item(1).getNodeName(), map.item(2).getNodeName(),
-                        map.item(3).getNodeName(), Integer.parseInt(map.item(4).getNodeName())));
+                if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) nodeList.item(i);
+                    list.add(new Employee(Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent()),
+                            element.getElementsByTagName("firstName").item(0).getTextContent(),
+                            element.getElementsByTagName("lastName").item(0).getTextContent(),
+                            element.getElementsByTagName("country").item(0).getTextContent(),
+                            Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent())));
+                }
             }
             return list;
-        } catch (ParserConfigurationException e) {
-            return Arrays.asList(e.getStackTrace());
-        } catch (IOException e) {
-            return Arrays.asList(e.getStackTrace());
-        } catch (SAXException e) {
+        } catch (Exception e) {
             return Arrays.asList(e.getStackTrace());
         }
     }
