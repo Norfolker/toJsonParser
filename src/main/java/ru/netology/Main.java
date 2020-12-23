@@ -103,7 +103,7 @@ public class Main {
                             element.getElementsByTagName("firstName").item(0).getTextContent(),
                             element.getElementsByTagName("lastName").item(0).getTextContent(),
                             element.getElementsByTagName("country").item(0).getTextContent(),
-                            Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent())));
+                            Integer.parseInt(element.getElementsByTagName("age").item(0).getTextContent())));
                 }
             }
             return list;
